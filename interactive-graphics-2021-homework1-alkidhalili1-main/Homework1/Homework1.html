@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div class="wrapper" style="margin: 0 auto; width: 1500px; position: relative;">
+
+<canvas id="gl-canvas" style="border: yes;" width="512" height="512"></canvas>
+
+
+<style>
+    .myDiv {
+      border: 5px outset black;
+      background-color: cyan;
+    }
+
+  
+	
+    </style>
+
+
+<div class="myDiv" style="position: absolute; top:0; right:0;">
+    <h3>Start and stop rotation.</h3>
+    <button id = "Button_Start_Rotation">Start/Stop Rotation</button>
+	<p> </p>
+	<h3>Rotation around axes and around barycenter.</h3>
+	<button id = "ButtonX">X-rotation</button>
+	<button id = "barycenter_on">AroundBaryCentre_on</button>
+	<p> </p>
+    <button id = "ButtonY">Y-rotation</button>
+	<button id = "barycenter_off">AroundBaryCentre_off</button>
+	<p> </p>
+    <button id = "ButtonZ">Z-rotation</button>
+   
+	
+	<p> </p>
+	<h3>Change the direction of rotation.</h3>
+	<button id = "Clockwise_Direction">Clockwise Direction</button>
+	<button id = "Counterclockwise_Direction">Counter-Clockwise Direction</button>
+	<p> </p>
+	<h3>Perspective projection view (ex3) and other buttons</h3>
+    
+	<p> </p>
+	<button id = "perspective_proj">Perspective_projection_on</button>
+	<p> </p>
+    
+    <button id = "increase_z">value of Z up</button>
+	<button id = "increase_r">value of R up</button>
+	<button id = "increase_theta">value of theta up</button>
+	<button id = "increase_phi">value of phi up</button>
+    
+	<p> </p>
+    <button id = "decrease_z">value of Z down</button>
+    <button id = "decrease_r">value of R down</button>
+	<button id = "decrease_theta">value of theta down</button>
+	<button id = "decrease_phi">value of phi down</button>
+    <p> </p>
+	
+	<h3>Turn light on and off.</h3>
+    <button id = "Light">Light On/Off</button>
+	
+	<p> </p>
+	<h3>Change betwen per-fragment and per-vertex shading.</h3>
+	<button id = "VertexShader">Do per-VertexShading</button>
+    <button id = "FragmentShader">Do per-FragmentShading</button>
+    
+	<p> </p>
+	<h3>Activate Bump texture map.</h3>
+    <button id = "Bump_texture">Activate/Deactivate Bump</button>
+</div>
+
+
+<!--  ------------------------------------------------------- -->
+<!--  ############### ---- VERTEX-SHADER ----- ############## -->
+<!--  ------------------------------------------------------- -->
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+precision highp float;
+
+in  vec4 aPosition;
+in  vec3 aNormal;
+in  vec2 aTexCoord;
+in  vec4 uObjTangent;
+
+out  vec2 vTexCoord;
+out vec4 vColor;
+out vec4 emissive;
+out vec3 Light1,Viewer1,N1;
+out vec2 off;
+uniform vec4 uLightEmissive , uAmbientProduct, uDiffuseProduct, uSpecularProduct;
+uniform bool uLightOn;
+uniform bool ufragment;
+uniform bool uBump_rm;
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
+uniform vec4 uLightPosition1;
+uniform vec4 uLightPosition2;
+uniform vec4 uLightPosition3;
+uniform float uShininess;
+uniform mat3 uNormalMatrix;
+uniform sampler2D uTextureMap;
+// -------------------------------------------------------
+// ############### ---- Main function ----- ##############
+// -------------------------------------------------------
+void main()
+{
+    vec3 viewer_position = (uModelViewMatrix * aPosition).xyz;
+    vec4 total = vec4(0.0,0.0,0.0,1.0);
+   if (ufragment){
+                vec3 Light,Eye;
+                vec3 position_First_Light= (uModelViewMatrix*uLightPosition1).xyz;
+                vec3 N = normalize( uNormalMatrix*aNormal.xyz);
+                vec3 T  = normalize(uNormalMatrix*uObjTangent.xyz);
+                vec3 B = cross(N, T);
+                Light.x = dot(T, position_First_Light-viewer_position);
+                Light.y = dot(B, position_First_Light-viewer_position);
+                Light.z = dot(N, position_First_Light-viewer_position);
+                Light = normalize(Light);
+                Eye.x = dot(T, -viewer_position);
+                Eye.y = dot(B, -viewer_position);
+                Eye.z = dot(N, -viewer_position);
+                Eye = normalize(Eye);
+                float Kd = max( dot(Light,N), 0.0 );
+                vec4 diffuse = Kd*uDiffuseProduct;
+                vec4 ambient = uAmbientProduct;
+                vec3 H = normalize(Light + Eye);
+                float Ks = pow( max(dot(N, H), 0.0), uShininess );
+                vec4 specular = Ks * uSpecularProduct;
+                if( dot(Light, N) < 0.0 ) {
+                        specular = vec4(0.0, 0.0, 0.0, 1.0);
+                    }
+                total = total+ ambient + diffuse +specular ;           
+   }
+
+   else{
+    vec3 Light,Eye;
+    vec3 position_First_Light= (uModelViewMatrix*uLightPosition3).xyz;
+    vec3 N = normalize( uNormalMatrix*aNormal.xyz);
+    vec3 T  = normalize(uNormalMatrix*uObjTangent.xyz);
+    vec3 B = cross(N, T);
+    Light.x = dot(T, position_First_Light-viewer_position);
+    Light.y = dot(B, position_First_Light-viewer_position);
+    Light.z = dot(N, position_First_Light-viewer_position);
+    Light = normalize(Light);
+    Eye.x = dot(T, -viewer_position);
+    Eye.y = dot(B, -viewer_position);
+    Eye.z = dot(N, -viewer_position);
+    Eye = normalize(Eye);
+    Light1=Light;
+    Viewer1 =Eye;
+    N1=N;}
+	
+    gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
+    vTexCoord = aTexCoord;
+    if (uBump_rm){
+        off = vec2(0.0,0.0);}
+    else{
+        off = vec2(1.0,1.0);};
+   
+    if (uLightOn){
+        emissive = uLightEmissive;}
+    else{ 
+        emissive = vec4(0,0,0,0);}
+    vColor =  total; 
+}
+</script>
+
+ <!-- ------------------------------------------------------- -->
+ <!-- ############### ---- FRAGMENT-SHADER ----- ############ -->
+ <!-- ------------------------------------------------------- -->
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+precision highp float;
+in vec4 vColor;
+in vec2 vTexCoord;
+in vec4 emissive;
+in vec3 Light1,Viewer1,N1;
+in vec2 off;
+out vec4 fColor;
+uniform sampler2D uTextureMap;
+uniform vec4 uAmbientProduct, uDiffuseProduct, uSpecularProduct;
+uniform float uShininess;
+void
+main()
+{   
+vec4 s = vec4(0.0,0.0,0.0,0.0);
+    if (vColor == vec4(0.0,0.0,0.0,1.0)){
+        vec4 Tex = texture(uTextureMap, vTexCoord);
+        vec3 NN =  normalize(2.0*Tex.xyz-1.0); 
+        float Kd = max( dot(Light1, NN), 0.0 );
+        vec4 diffuse = Kd*uDiffuseProduct;
+        vec4 ambient = uAmbientProduct;
+        vec3 H = normalize(Light1 + Viewer1);
+        float Ks = pow( max(dot(N1, H), 0.0), uShininess );
+        vec4 specular = Ks * uSpecularProduct;
+        if( dot(Light1, N1) < 0.0 ) {
+                specular = vec4(0.0, 0.0, 0.0, 1.0);
+            }
+    s = s+ ambient + diffuse +specular ; }
+if(off==vec2(0.0,0.0)){fColor =  emissive  + (vColor+s);}
+else{ fColor =  emissive  + (vColor+s)* texture(uTextureMap, vTexCoord);}
+}
+</script>
+<script src="../Common/initShaders.js"></script>
+<script src="..//Common/MVnew.js"></script>
+<script src="..//Common/geometry.js"></script>
+<script src="Homework1.js"></script>
+</body>
+</html>
