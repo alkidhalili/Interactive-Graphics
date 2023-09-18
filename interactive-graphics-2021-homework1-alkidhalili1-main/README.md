@@ -1,7 +1,6 @@
 # 2021-homework1
-Template repository for Homework1 of Interactive Graphics 2021
 
-This repository contains the initial files for the first homework of the Interactive Graphics course of the Master course in Artificial Intelligence and Robotics (and also of the Engineering in Computer Science course) of Sapienza University of Rome. The assignment in PDF format is in the repository, the textual format follows here:
+This repository contains the initial files for the first homework of the Interactive Graphics course of the Master course in Artificial Intelligence and Robotics  of Sapienza University of Rome. The assignment in PDF format is in the repository, the textual format follows here:
 
 You need to modify the files so to obtain the following effects: 
 
@@ -15,5 +14,4 @@ You need to modify the files so to obtain the following effects:
 
 Describe your solution in a short PDF document (2-3 pages) describing the techniques used, the advantages and disadvantages of the proposed solution and the features of your solution. 
 
-How to submit the homework
-The solution should be delivered on the GitHub Classroom repository. DO NOT USE YOUR GITHUB PERSONAL ACCOUNT. Do not post solutions or code on Google Classroom. Use Google Classroom only for questions and clarifications. Do not ask for clarifications or comments by email, use only Google Classroom
+
